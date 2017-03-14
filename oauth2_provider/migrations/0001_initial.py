@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from oauth2_provider.settings import oauth2_settings
 from django.db import models, migrations
 import oauth2_provider.validators
 import oauth2_provider.generators
@@ -12,10 +11,22 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        migrations.swappable_dependency(oauth2_settings.APPLICATION_MODEL),
+        migrations.swappable_dependency(settings.OAUTH2_PROVIDER_APPLICATION_MODEL),
     ]
 
     operations = [
+        migrations.CreateModel(
+            name='AccessToken',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('token', models.CharField(max_length=255, db_index=True)),
+                ('expires', models.DateTimeField()),
+                ('scope', models.TextField(blank=True)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
         migrations.CreateModel(
             name='Application',
             fields=[
@@ -31,17 +42,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-        ),
-        migrations.CreateModel(
-            name='AccessToken',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('token', models.CharField(max_length=255, db_index=True)),
-                ('expires', models.DateTimeField()),
-                ('scope', models.TextField(blank=True)),
-                ('application', models.ForeignKey(to=oauth2_settings.APPLICATION_MODEL)),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-            ],
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='Grant',
@@ -51,9 +52,12 @@ class Migration(migrations.Migration):
                 ('expires', models.DateTimeField()),
                 ('redirect_uri', models.CharField(max_length=255)),
                 ('scope', models.TextField(blank=True)),
-                ('application', models.ForeignKey(to=oauth2_settings.APPLICATION_MODEL)),
+                ('application', models.ForeignKey(to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL)),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
+            options={
+            },
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='RefreshToken',
@@ -61,8 +65,23 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('token', models.CharField(max_length=255, db_index=True)),
                 ('access_token', models.OneToOneField(related_name='refresh_token', to='oauth2_provider.AccessToken')),
-                ('application', models.ForeignKey(to=oauth2_settings.APPLICATION_MODEL)),
+                ('application', models.ForeignKey(to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL)),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='accesstoken',
+            name='application',
+            field=models.ForeignKey(to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='accesstoken',
+            name='user',
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            preserve_default=True,
         ),
     ]
